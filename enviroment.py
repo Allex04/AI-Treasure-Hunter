@@ -3,12 +3,11 @@ import matplotlib.pyplot as plt
 
 class TreasureHunter:
     def __init__(self):
-        self.grid_size = 8         
+        self.grid_size = 8        
         self.n_actions = 4
         self.max_steps = 100
         self.steps = 0
-        self.Q_table = np.zeros((self.grid_size, self.grid_size, self.n_actions))
-        self.grid = np.zeros((8,8), dtype=int)
+        self.grid = np.zeros((self.grid_size, self.grid_size), dtype=int)
     
         self.grid[2,2] = 1
         self.grid[2,3] = 1
@@ -25,7 +24,10 @@ class TreasureHunter:
         return self.state
 
     def is_terminal(self, state):
-        return bool(self.grid[state] == 3 or self.grid[state] == 4 or self.steps >= self.max_steps)
+        return bool(self.grid[state] == 3 or self.grid[state] == 4)
+
+    def is_truncated(self):
+        return self.steps >= self.max_steps
 
     def get_next_state(self, state, action):
         next_state = list(state)
@@ -55,8 +57,9 @@ class TreasureHunter:
         elif self.grid[next_state] == 4:
             reward = 30
         self.state = next_state
-        done = self.is_terminal(next_state)
-        return next_state, reward, done
+        terminal = self.is_terminal(next_state)
+        truncated = self.is_truncated()
+        return next_state, reward, terminal, truncated
 
 
 #test    
@@ -70,3 +73,7 @@ print(game.step(1))  # trap
 
 game.state = (0, 5)
 print(game.step(1))  # small treasure
+
+game.reset()
+game.steps = 99
+print(game.step(1))
